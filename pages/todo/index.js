@@ -1,63 +1,112 @@
 const taskKey = '@tasks'
 
-function abrirDialog(titulo,desc){
-  const modal = document.getElementById('dialogEditar')
-  const title = document.getElementById('titulo')
-  const descricao = document.getElementById('descricao')
-  
-  title.setAttribute('placeholder',titulo)
-  descricao.setAttribute('placeholder',desc)
-  modal.showModal()
+let selectedTaskId = null
+
+function editTask(event){
+  event.preventDefault()
+  const tasks = JSON.parse(localStorage.getItem(taskKey)) || []
+  const task = tasks[selectedTaskId]
+  const editTitle = document.querySelector('#editTaskForm #title')
+  const editDescription = document.querySelector('#editTaskForm #description')
+  const dialog = document.querySelector('dialog')
+  task.title = editTitle.value
+  task.description = editDescription.value
+  tasks[selectedTaskId] = task
+  localStorage.setItem(taskKey,JSON.stringify(tasks))
+  dialog.close()
+  window.location.reload(true)
 }
 
-function fecharModal(){
-  const modal = document.getElementById('dialogEditar')
-  modal.close()
-}
 
 // Função para adicionar tarefa
 function addTask(event) {
   event.preventDefault() // Evita o recarregamento da página
   const taskId = new Date().getTime()
   const taskList = document.querySelector('#taskList')
+
   const form = document.querySelector('#taskForm')
   const formData = new FormData(form)
+
   const taskTitle = formData.get('title')
   const taskDescription = formData.get('description')
-  const li = document.createElement('li')
-  const botaoEditar = criaBotaoEditar();
 
-  li.id = taskId
-  li.innerHTML = `  
+  const li = document.createElement('li')
+
+  li.id = `id-${taskId}`
+  li.innerHTML = `
+    <div>
       <h2>${taskTitle}</h2>
       <p>${taskDescription}</p>
+    </div>
+    <button title="Editar tarefa" onClick="openEditDialog(${taskId})">✏️</button>
+    <button id="buttonDelete"title="Deletar tarefa" onClick="deleteDialog(${taskId})">❌</button>
   `
-  taskList.appendChild(botaoEditar)
+
   taskList.appendChild(li)
-  
+
   // Salvar tarefas no localStorage
   const tasks = JSON.parse(localStorage.getItem(taskKey)) || []
-  tasks.push({ title: taskTitle, description: taskDescription })
+  tasks.push({
+    id: taskId,
+    title: taskTitle,
+    description: taskDescription,
+  })
   localStorage.setItem(taskKey, JSON.stringify(tasks))
 
   form.reset()
 }
 
-function criaBotaoEditar(){
-  const botaoEditar = document.createElement('button')
-  botaoEditar.setAttribute('onClick','abrirDialog()')
-  botaoEditar.setAttribute('title','Editar tarefa')
-  botaoEditar.append('✏️');
-  return botaoEditar;
+function editaTask(taskId){
+  const tasks = JSON.parse(localStorage.getItem(taskKey)) || []
+  selectedTaskId = tasks.findIndex((task) => task.id === taskId)
+  const task = tasks[selectedTaskId]
+}
+
+function openEditDialog(taskId) {
+  const tasks = JSON.parse(localStorage.getItem(taskKey)) || []
+  selectedTaskId = tasks.findIndex((task) => task.id === taskId)
+  const task = tasks[selectedTaskId]
+  const dialog = document.querySelector('dialog')
+  const editTitle = document.querySelector('#editTaskForm #title')
+  const editDescription = document.querySelector('#editTaskForm #description')
+  editTitle.value = task.title
+  editDescription.value = task.description
+  dialog.showModal()
+}
+
+function closeDialog() {
+  const dialog = document.querySelector('dialog')
+  dialog.close()
 }
 
 // Carregar tarefas do localStorage ao recarregar a página
 window.addEventListener('DOMContentLoaded', () => {
   const tasks = JSON.parse(localStorage.getItem(taskKey)) || []
   const taskList = document.querySelector('#taskList')
-  for(let task of tasks){
-  const botaoEditar = criaBotaoEditar()
-  taskList.append(botaoEditar);
-  taskList.innerHTML = `<button onClick="abrirDialog(${task.title,task.description})" title = "Editar tarefa">✏️</button><li><h2>${task.title}</h2><p>${task.description}</p></li>`
-}
+  taskList.innerHTML = tasks
+    .map(
+      (task) => `
+      <li id='id-${task.id}'>
+        <div>
+          <h2>${task.title}</h2>
+          <p>${task.description}</p>
+        </div>
+        <button title="Editar tarefa" onClick="openEditDialog(${task.id})">✏️</button>
+        <button id="buttonDelete"title="Deletar tarefa" onClick="deleteDialog(${task.id})">❌</button>
+      </li>
+    `
+    )
+    .join('')
 })
+
+function deleteDialog(id){
+  const lista = document.getElementById('taskList')
+  const filhoRemover =  document.getElementById('id-'+id)
+  lista.removeChild(filhoRemover)
+  const task = JSON.parse(localStorage.getItem(taskKey))
+  selectedTaskId = task.findIndex((task) => task.id === id)
+  let a = task.splice(selectedTaskId,1)
+  localStorage.setItem(taskKey,JSON.stringify(task))
+}
+
+const formEdita = document.getElementById('editTaskForm')

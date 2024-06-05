@@ -12,6 +12,28 @@
         <h1>Todo List</h1>
       </header>
       <main>
+        <dialog>
+          <form id="editTaskForm" onsubmit="editTask(event)">
+            <input
+              type="text"
+              name="title"
+              id="title"
+              required
+              placeholder="Informe o título da tarefa"
+            />
+            <textarea
+              id="description"
+              name="description"
+              required
+              placeholder="Informe a descrição da tarefa"
+            ></textarea>
+            <div>
+              <button type="submit">Editar Tarefa</button>
+              <button type="button" onclick="closeDialog()">Cancelar</button>
+            </div>
+          </form>
+        </dialog>
+
         <!-- Formulário para adicionar tarefas -->
         <form id="taskForm" onsubmit="addTask(event)">
           <input
@@ -38,29 +60,5 @@
 
     <script src="./index.js"></script>
     <script src="../../footer-counter.js"></script>
-    <!-- Um dialog simples contendo um form -->
-<dialog  id="dialogEditar">
-  <form method="dialog">
-    <section>
-      <p>
-        <label for="todo">Titulo</label>
-        <br>
-        <input type ="text" id="titulo"></input>
-      </p>
-      <p>
-        <label for="todo" >Descricao</label>
-        <input type ="text" id="descricao"></input>
-      </p>
-    </section>
-    <menu>
-      <button id="cancel" onClick="fecharModal()" type="reset">Cancelar</button>
-      <button type="submit">Editar</button>
-    </menu>
-  </form>
-</dialog>
-
-<menu>
-  <button id="updateDetails">Update details</button>
-</menu>
   </body>
 </html>
